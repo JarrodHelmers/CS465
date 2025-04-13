@@ -6,10 +6,8 @@ const tripsList = async (req, res) => {
   const q = await Model.find({}) // No filter, return all records
     .exec();
 
-  // console.log(q);
-
   if (!q) {
-    // Database returned no data
+    // Database returns no data
     return res.status(404).json(err);
   } else {
     // Return resulting trip list
@@ -20,10 +18,8 @@ const tripsList = async (req, res) => {
 const tripsFindByCode = async (req, res) => {
   const q = await Model.find({ code: req.params.tripCode }).exec();
 
-  // console.log(q);
-
   if (!q) {
-    // Database returned no data
+    // Database returns no data
     return res.status(404).json(err);
   } else {
     // Return resulting trip list
@@ -31,7 +27,63 @@ const tripsFindByCode = async (req, res) => {
   }
 };
 
+const tripsUpdateTrip = async (req, res) => {
+  console.log(req.params);
+  console.log(req.body);
+  try {
+    const q = await Model.findOneAndUpdate(
+      { code: req.params.tripCode },
+      {
+        code: req.body.code,
+        name: req.body.name,
+        length: req.body.length,
+        start: req.body.start,
+        resort: req.body.resort,
+        perPerson: req.body.perPerson,
+        image: req.body.image,
+        description: req.body.description,
+      }
+    ).exec();
+
+    if (!q) {
+      // Database returns no data
+      return res.status(404).json({ message: "Trip not found" });
+    } else {
+      // Return resulting updated trip
+      return res.status(200).json(q);
+    }
+
+  } catch (error) {
+    console.error("Error updating trip:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const tripsAddTrip = async (req, res) => {
+  const newtrip = new Trip({
+    code: req.body.code,
+    name: req.body.name,
+    length: req.body.length,
+    start: req.body.start,
+    resort: req.body.resort,
+    perPerson: req.body.perPerson,
+    image: req.body.image,
+    description: req.body.description,
+  });
+
+  const q = await newtrip.save();
+
+  if (!q) {
+    //Database returns no data
+    return res.status(400).json(err);
+  } else {
+    return res.status(201).json(q);
+  }
+};
+
 module.exports = {
   tripsList,
   tripsFindByCode,
+  tripsAddTrip,
+  tripsUpdateTrip,
 };
